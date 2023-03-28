@@ -2,4 +2,4 @@
 
 This course aims to be the starting point for all researchers who intend to implement structural equation models in their research.
 
-https://tropibioworkshops.github.io/SEM_course/#/title-slide
+https://tropibioworkshops.github.io/SEM_course/
