@@ -1,0 +1,734 @@
+---
+title: "`Introduction to SEM with lavaan`"
+subtitle: "`Fernanda Alves Martins`  \n`Javier Martinez Arribas`"
+author: "```r format(Sys.time(), '%d %B, %Y')```"
+title-slide-attributes:
+    data-background-image: "Tropibio4.jpg"
+    data-background-size: cover
+    data-background-opacity: "0.4"
+format:
+  revealjs:
+    incremental: true
+    slide-number: true
+    format:
+      theme: dark
+      height: 900
+      width: 1600
+    chalkboard: 
+      buttons: true
+    preview-links: auto
+    logo: "Tropibio2.jpg"
+    css: styles.css
+    footer: <https://cibio-tropibio.pt/en/>
+---
+
+## 
+
+## Structural Equation Modelling
+
+::: incremental
+Structural Equation Modeling (SEM) is a comprehensive and flexible approach that consists of studying, [in a hypothetical model]{.underline}, the relationships between variables, whether they are measured or latent, meaning not directly observable, like any psychological construct (for example, intelligence, satisfaction, hope, trust).
+
+Hypothetical because we try to predict and explain phenomena based on non-experimental observations.
+:::
+
+## Structural Equation Modelling
+
+Structural equation modeling is a linear model framework that models both simultaneous regression equations with latent variables.
+
+Models such as linear regression, multivariate regression, path analysis, confirmatory factor analysis, and structural regression can be thought of as special cases of SEM.
+
+## Structural Equation Modelling
+
+::: incremental
+The following relationships are possible in SEM:
+:::
+
+::: incremental
+-   observed to observed variables (e.g. regression)
+
+-   latent to observed variables (e.g. confirmatory factor analysis)
+
+-   latent to latent variables (e.g. structural regression)
+:::
+
+## Structural Equation Modelling
+
+::: incremental
+The most common models that fall under the SEM framework including
+
+-   simple regression
+
+-   multiple regression
+
+-   multivariate regression
+
+-   path analysis
+
+-   confirmatory factor analysis
+
+-   structural regression
+:::
+
+## Structural Equation Modelling
+
+To summarize this brief introduction, it is important to recognize that interpreting correlation or partial correlation in terms of causality can be imprudent.
+
+Mathematics alone cannot reveal the nature of the relationship between two variables, but can only indicate the extent to which they tend to vary together.
+
+## Structural Equation Modelling
+
+::: incremental
+As for the causality, it requires three criteria (or conditions):
+
+1.  the association rule, that is the two variables must be statistically associated.
+
+2.  the causal order between variables, the (quite often) temporal order where the cause precedes the effect must be determined without ambiguity and definitely with theoretical reasons that allow for assuming the order.
+
+3.  the non-artificiality rule, in which the association between the two variables must not disappear when we remove the effects of variables that precede them in the causal order.
+:::
+
+## Structural Equation Modelling
+
+It is evident that meeting these three criteria is only achievable through experimentation, limited by what is feasible and conceivable.
+
+It should be noted that no matter how advanced or intelligent a statistical technique may be, such as analysis of variance, regression, or path analysis, it cannot establish a causal relationship between variables.
+
+## Definitions
+
+::: incremental
+-   observed variable: a variable that exists in the data, a.k.a item or manifest variable
+
+-   latent variable: a variable that is constructed and does not exist in the data
+
+-   exogenous variable: an independent variable either observed (x) or latent ( ) that explains an endogenous variable
+
+-   endogenous variable: a dependent variable, either observed (y) or latent ( ) that has a causal path leading to it
+:::
+
+## Definitions
+
+::: incremental
+-   measurement model: a model that links observed variables with latent variables
+
+-   indicator: an observed variable in a measurement model (can be exogenous or endogenous)
+
+-   factor: a latent variable defined by its indicators (can be exogenous or endogenous)
+
+-   loading: a path between an indicator and a factor
+:::
+
+## Definitions
+
+::: incremental
+-   structural model: a model that specifies causal relationships among exogenous variables to endogenous variables (can be observed or latent)
+
+-   regression path: a path between exogenous and endogenous variables (can be observed or latent)
+:::
+
+## Path Diagram Legend
+
+In order to make it easier to comprehend the matrix equations, a path diagram will be provided for each matrix formulation, as it serves as a symbolic and straightforward visualization tool.
+
+![](Path_diagram.png){width="300" height="300" fig-align="center"}
+
+## Examples of SEM models
+
+![](Regression.png){width="300" height="150" fig-align="center"}
+
+![](SEM.png){width="600" height="300" fig-align="center"}
+
+## Linear regression diagram
+
+![Regression model diagram](Regresion.png){width="900" height="500" fig-align="center"}
+
+
+## Setting up
+
+Firstly we need to install the next packages:
+
+`lavaan` and `semPlot`
+
+```{r echo=T, eval= F}
+install.packages("lavaan")
+install.packages("semPlot")
+```
+
+Then load with `library()`
+
+```{r echo=T, eval= T}
+library(lavaan)
+library(semPlot)
+```
+
+## Example Data
+
+We will utilize the sample data integrated into `lavaan` to examine its syntax and output.
+
+Our example uses a classic data set from the literature on the testing of mental abilities. \
+The Holzinger and Swineford (1939) data set contains test scores from around 300 teenagers at two different schools, each of whom completed a series of tests measuring performance for different tasks.
+
+```{r echo=T, eval= T}
+data(HolzingerSwineford1939)
+```
+
+## Example Data
+
+We can summarise the relationships between the variables by generating a covariance matrix:
+
+```{r echo=T, eval=T}
+round(cov(HolzingerSwineford1939[,7:15]),digits=2)
+```
+
+## Example Data
+
+It can be more helpful to look at the correlation matrix, which is a standardised version of the covariance matrix:
+
+```{r echo=T, eval=T}
+round(cor(HolzingerSwineford1939[,7:15]),digits=2)
+```
+
+## Example Data
+
+It can be more helpful to look at the correlation matrix, which is a standardised version of the covariance matrix:
+
+```{r echo=T, eval=T}
+pairs(HolzingerSwineford1939[,7:15], col="blue", cex = .25,main="Scatterplots", )
+```
+
+## Example Data
+
+The correlation matrix displays predominantly positive associations between various variable combinations, with the highest correlation (r = 0.73) observed between x4 and x5, which refer to paragraph comprehension and sentence completion tasks.
+
+Notably, a cluster of high correlations is centered around x4, x5, and x6.
+
+Nevertheless, merely by examining the correlation matrix, it proves difficult to comprehend the data set's structure.
+
+Alternatively, a hypothetical model can be constructed to depict the potential relationships.
+
+## lavaan Syntax: Operators
+
+::: incremental
+`lavaan` uses a simplified syntax using three primary operators:
+
+-   `~` for regressions
+-   `=~` for latent variables
+-   `~~` for variances and covariances
+:::
+
+Every model will be specified with *strings of text* containing some combination of these three operators.
+
+## lavaan Syntax: Functions
+
+::: incremental
+`lavaan` uses three primary functions for estimating models:
+
+-   `cfa()` for Confirmatory Factor Analysis
+-   `sem()` for Structural Equation Models
+-   `lavaan()` for *all* models.
+:::
+
+To view the default arguments for each function, you can access the help documentation.(`?cfa`)
+
+It is normal to utilize `sem()` for all my analyses as I am accustomed to its default settings and usually estimate traditional structural equation models.
+
+## Linear regression
+
+It is highly likely that most, if not all of you, are familiar with how to specify a linear regression in R:
+
+```{r echo=T, eval= T}
+lm_1 <- lm(x4 ~ ageyr, data=HolzingerSwineford1939)
+```
+
+We can specify a simple linear regression in `lavaan` similarly:
+
+```{r echo=T, eval= T}
+sem_1 <- sem('x4 ~ ageyr', data=HolzingerSwineford1939)
+```
+
+This syntax specifies that `x4` is regressed on `ageyr`, with the dependent variable placed on the left of `~` and the independent variable(s) on the right.
+
+Note the formulas for `lavaan` calls are *in quotes*:\
+`lavaan` requires text input, which it converts into individual equations internally.
+
+## Linear regression
+
+```{r echo=T, eval= T}
+summary(lm_1)
+```
+
+## Linear regression
+
+```{r echo=T, eval= T}
+summary(sem_1)
+```
+
+## Multiple linear regression
+
+We can specify multiple regression models by including additional covariates on the right-hand side of the formulas.
+
+In `lm()`:
+
+```{r echo=T, eval= T}
+lm_2 <- lm(x4 ~ ageyr + sex + grade, 
+               data=HolzingerSwineford1939)
+```
+
+In `sem()`:
+
+```{r echo=T, eval= T}
+sem_2 <- sem('x4 ~ ageyr + sex + grade', 
+                 data=HolzingerSwineford1939)
+```
+
+## CFA
+
+Factor analysis can be categorized into two primary types: exploratory and confirmatory.
+
+\
+**Exploratory factor analysis** (EFA) is an exploratory technique used to comprehend the underlying psychometric characteristics of an unfamiliar scale.
+
+\
+In contrast, **confirmatory factor analysis** shares many of the same principles as EFA, but instead of allowing the data to reveal the factor structure, we pre-specify the factor structure and validate the psychometric properties of a pre-existing scale.
+
+## CFA
+
+We can construct a first hypothetical model of the potential
+relationships.
+
+One very simple model is that a single underlying factor determines
+performance on all tasks.
+
+This general intelligence, or g, factor is widely discussed in the literature on human cognitive ability (Spearman 1904).
+
+It is the classic example of a latent variable - a construct that we hypothesise might exist, but
+we cannot measure directly.
+
+## CFA
+
+```{r echo=T, eval=T}
+cfa_0 <- '
+   g  =~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9
+'
+cfa_0 <- cfa(cfa_0, data=HolzingerSwineford1939)
+
+```
+
+## CFA
+
+```{r echo=T, eval=T}
+summary(cfa_0, fit.measures=TRUE, standardized=TRUE)
+```
+
+## CFA
+
+```{r echo=T, eval=T}
+semPaths(cfa_0,layout="circle",whatLabels="stand",edge.label.cex=1)
+```
+
+## CFA
+
+An alternative model might be to propose that there are several latent variables, which map on to specific abilities that are probed by more than one test.
+
+For example, we might propose a latent variable for the visual tasks (x1-x3), another for the literacy tasks (x4-x6) and a final one for the timed tasks (x7-x9). We could allow interdependencies (i.e. correlations) between these three latent variables, and represent the model with the diagram in Figure 12.3.
+
+We are going to define three latent (unobserved) variables, `visual`, `textual`, and `speed`, each with three observed indicators.
+
+## CFA
+
+```{r echo=T, eval= T}
+cfa_1 <- '
+   visual  =~ x1 + x2 + x3
+   textual =~ x4 + x5 + x6
+   speed   =~ x7 + x8 + x9
+'
+cfa_1 <- cfa(cfa_1, data=HolzingerSwineford1939)
+```
+
+## CFA
+
+```{r echo=T, eval= T}
+summary(cfa_1)
+```
+
+## CFA
+
+The larger the chi-square value the larger the difference between the sample implied covariance matrix and the sample observed covariance matrix, and the more likely you will reject your model.
+
+David Kenny states that for models with 75 to 200 cases chi-square is a reasonable measure of fit, but for 400 cases or more it is nearly almost always significant.
+
+Our conclusion may be supplemented with other fit indices.
+
+## semPlot diagram
+
+```{r echo=T, eval= T}
+semPaths(cfa_1, whatLabels = "est")
+```
+
+## STEP 1: model specification
+
+This is what we have done just done. We consider the possible relationships between the variables we have measured (or are planning to measure), and one or more hypothesised latent variables.
+
+It can often be helpful to create diagrams when designing a model, as a guide to thinking about possible relationships. \
+This is one of the real strengths of structural equation modelling, as it allows us to make theories and hypotheses explicit by instantiating them in a model, which we then go on to test empirically.
+
+## STEP 2: model identification
+
+Once we have specified our model, we then check that it is suitable for conducting SEM.
+
+This involves a process called model identification, where we check that the degrees of freedom in the model (known as the number of free parameters) does not exceed the degrees of freedom in the data set (known as the number of data points). We can have the next different models:
+
+-   Satured models: nº data points = free parameters
+
+-   Under-identified models: nº data points \< free parameters
+
+-   Over-identified models: nº data points \> free parameters
+
+## STEP 2: model identification
+
+::: {incremental}
+-   degrees of freedom in the data set (known parameters): n(n+1)/2. Serve as the upper limit of the number of parameters you can possibly estimate in your model.
+
+-   degrees of freedom in the model (model parameters): the number of parameters you need to estimate in your model. (The total number of latent variables + the number of error terms on the measured variables + any covariances between measured variables)
+:::
+
+## STEP 3: model evaluation
+
+Once fitted, the model is traditionally assessed using a chi-square statistic. Somewhat counterintuitively, a non-significant chi-square statistic indicates a good fit.
+
+However, as with other significancetests, this turns out to be highly dependent on sample size and with large samples (e.g. N\>400) will often be statistically significant even when the model fit is actually quite good.
+
+To address this, several alternative fit indices have been developed. Some of these (for example, the Bentler-Bonett index, Comparative fit index, Bollen index, and McDonald index) indicate a good fit when they have values near 1.
+
+## STEP 3: model evaluation
+
+Conventions about exactly what values are considered 'good' will differ across disciplines, but 0.9 is often acceptable.
+
+For other fit estimates, such as the Root Mean Square Error or measures of residual variance, a low value near 0 indicates a good fit.
+
+## Model Fit Statistics
+
+Typically, rejecting the null hypothesis is a good thing, but if we reject the CFA null hypothesis then we would reject our user model (which is bad).
+
+When fit measures are requested, lavaan outputs a plethora of statistics, but we will focus on the four commonly used ones:
+
+::: incremental
+-   Model chi-square is the chi-square statistic we obtain from the maximum likelihood statistic (in lavaan, this is known as the Test Statistic for the Model Test User Model)
+
+-   CFI is the Comparative Fit Index -- values can range between 0 and 1 (values greater than 0.90, conservatively 0.95 indicate good fit)
+:::
+
+## Model Fit Statistics
+
+::: incremental
+-   TLI Tucker Lewis Index which also ranges between 0 and 1 (if it's greater than 1 it should be rounded to 1) with values greater than 0.90 indicating good fit. If the CFI and TLI are less than one, the CFI is always greater than the TLI.
+
+-   RMSEA is the root mean square error of approximation In lavaan, you also obtain a p-value of close fit, that the RMSEA \< 0.05. If you reject the model, it means your model is not a close fitting model.
+:::
+
+## Model Fit Statistics
+
+```{r echo=T, eval= T}
+summary(cfa_1, fit.measures=TRUE, standardized=TRUE)
+```
+
+## Model Fit Statistics
+
+The three subsequent sections of the output report additional measures of goodness of fit, including the log likelihood, the Akaike Information Criterion, the Bayesian Information criterion, and the root mean square (RMS) error.
+
+These values are particularly useful for comparing between different possible models.
+
+## Model Fit Statistics
+
+The final sections of the output show parameter estimates for the latent variables, covariances and variances.
+
+These are somewhat difficult to interpret in table format, so we can add the parameter estimates to the path diagram to give a numerical indication of the strength of the links between variables.
+
+This can be done using standardised or unstandardised values.
+
+In general, standardised values are more useful, as the values are then similar to correlation coefficients.
+
+The fitted parameters show high loading of individual measures onto the latent variables (coefficients between 0.40 and 0.80).
+
+## STEP 4: model modification
+
+The final stage of SEM is to consider possible modifications to the model that might improve its description of the data. To do this, parameters can be added or removed (or both).
+
+The change in fit when parameters are added is assessed by the Lagrange Multiplier test (sometimes called the score test).
+
+These procedures are conceptually similar to step-wise and backward step-wise entry of predictors in multiple regression, and come with similar pitfalls.
+
+## STEP 4: model modification
+
+Adding many new parameters at once is not advisable, as the parameters may be highly correlated (and therefore not very informative).
+
+The order in which parameters are added and removed can also affect the outcome, so care is advised when attempting changes to the model.
+
+## STEP 4: model modification
+
+```{r echo=T, eval=T}
+mi <- modindices(cfa_1, sort=TRUE)
+mi[mi$op == "=~",1:4] 
+```
+
+## STEP 4: model modification
+
+```{r echo=T, eval=T}
+cfa_2<- ' 
+  visual =~ x1 + x2 + x3 + x9
+  textual =~ x4 + x5 + x6
+  speed =~ x7 + x8 + x9 
+'
+cfa_2 <- cfa(cfa_2, data = HolzingerSwineford1939)
+
+semPaths(cfa_2,layout="circle",whatLabels="stand",edge.label.cex=1)
+```
+
+## STEP 4: model modification
+
+```{r echo=T, eval=T}
+
+a <- lavTestScore(cfa_1, add = 'visual =~ x9')
+a$uni
+
+fitmeasures(cfa_1,'rmsea')
+
+fitmeasures(cfa_2,'rmsea')
+```
+
+## STEP 4: model modification
+
+```{r echo=T, eval=T}
+cfa_3 <- ' 
+  visual =~ x1 + b1*x2 + x3
+  textual =~ x4 + x5 + x6
+  speed =~ x7 + x8 + x9 '
+cfa_3 <- cfa(cfa_3, data = HolzingerSwineford1939)
+lavTestWald(cfa_3, constraints = 'b1 == 0')
+```
+
+## STEP 4: model modification
+
+The Wald test also produces a significant p-value, suggesting this change to the
+model should be investigated more thoroughly.
+
+```{r echo=T, eval=T}
+fitmeasures(cfa_3,'rmsea')
+```
+
+However, on further inspection, it actually produces a larger RMS error (and therefore a worse fit) than our
+original model.
+
+## CAVEATS: Cross-validation 
+
+One thing to worry about in SEM is making sure that the model works for more than just the data it was made for.
+
+If the data set is large enough, we might split the data in
+two (male and female is sometimes used, assuming these are expected involve
+the same relationships between variables), fit the model to the two data sets separately, and then compare the model parameters (coefficient estimates) to check that they are similar.
+
+## CAVEATS: Power and SEM
+
+SEM is a large sample size technique, and parameter estimates will only be
+stable with N\>200 participants. A further standard recommendation is to test at
+least 5 (and ideally 10) participants per measured variable (while still requiring
+at least 200 observations). This is because the parameters we are estimating are
+effectively correlation coefficients, and these are very hard to estimate precisely
+with small sample sizes.
+
+## CAVEATS: Missing Data
+
+One issue that can dramatically reduce power is when observations are missing
+from a data set. If we excluded all participants with at least one missing data
+point, for some data sets this would substantially decrease the overall sample
+size. To avoid this situation, it is common practise to replace missing data points
+with an estimated value. This maintains the sample size and keeps the model
+as robust as possible. A simple method to do this is to replace a missing data
+point with the mean score for that variable.
+
+## Other models: Walking dog
+
+A popular example of a SEM is the walking dog model, which comprises of two latent variables, both with two indicators, and a regression connecting them.
+
+```{r echo=T, eval= T}
+wd_1 <- '
+   X =~ x1 + x2
+   Y =~ x4 + x5
+   Y ~ X
+'
+wd_1 <- sem(wd_1, data=HolzingerSwineford1939)
+```
+
+## Walking dog
+
+```{r echo=T, eval= T}
+summary(wd_1, fit.measures=TRUE, standardized=TRUE)
+```
+
+## semPlot diagram
+
+```{r echo=T, eval= T}
+semPaths(wd_1, whatLabels = "est")
+```
+
+## Other models: Fixing covariances
+
+We can also constrain covariances to `0` with the same basic syntax.
+
+```{r echo=T, eval=T}
+cfa_4 <- '
+   visual  =~ x1 + x2 + x3
+   textual =~ x4 + x5 + x6
+   speed   =~ x7 + x8 + x9
+
+   visual  ~~ 0*textual + 0*speed
+'
+cfa_4 <- cfa(cfa_4, data=HolzingerSwineford1939)
+```
+
+For covariances, you can have only one variable left of `~~` but multiple on the right.
+
+Here we have made the assumption that the `visual` latent construct is **orthogonal** to `textual` and `speed`.
+
+## Other models: Fixing covariances
+
+```{r echo=T, eval=T}
+
+summary(cfa_4, fit.measures=TRUE, standardized=TRUE)
+
+```
+
+## Other models: Fixing covariances
+
+```{r echo=T, eval=T}
+
+semPaths(cfa_4, whatLabels = "est")
+```
+
+## Complex models
+
+We can put multiple latent variables, regressions, and covariances together to build complex models.
+
+Here is a three factor mediation model:
+
+-   `visual` is dependent on `textual` and `speed`
+
+-   The effect of `speed` on `visual` is partially mediated by `textual`.
+
+## Complex models
+
+```{r echo=T, eval=T}
+
+complex <- '
+   visual  =~ x1 + x2 + x3
+   textual =~ x4 + x5 + x6
+   speed   =~ x7 + x8 + x9
+
+   visual  ~ textual + speed
+   textual ~ speed
+'
+complex <- sem(complex, data=HolzingerSwineford1939)
+```
+
+## Complex models
+
+```{r echo=T, eval=T}
+
+summary(complex, fit.measures=TRUE, standardized=TRUE)
+
+```
+
+## Complex models
+
+```{r echo=T, eval=T}
+
+semPaths(complex, whatLabels = "est")
+```
+
+## Other lavaan Features
+
+`lavaan` is highly customizable and contains many features useful for fitting complex structural equations.
+
+::: incremental
+
+-   Alternate **estimators**
+
+-   Proper treatment of **categorical variables**
+
+-   Input using **covariance matrices**
+
+-   **Additional arguments** for specifying models
+
+:::
+
+## Alternate estimators
+
+`lavaan` defaults to using a full-information Maximum-Likelihood (ML) Estimator. This is the most efficient estimator available and can handle missing data (`missing=ml`).
+
+We may want to specify alternate estimators if our data do not meet the assumptions for ML.
+
+By adding the `estimator=` argument to our `cfa()`, `sem()`, or `lavaan()` call, we can choose another estimator.
+
+Some useful choices:
+
+-   `estimator="MLM"`: ML with robust errors and Satorra-Bentler test statistic.
+
+-   `estimator="WLSMV"`: Weighted least squares with mean and variance adjusted test statistic (needed for categorical endogenous variables).
+
+Example `sem()` call:
+
+```{r echo=T, eval=T}
+
+sem(complex, data=HolzingerSwineford1939, estimator="MLM")
+```
+
+## Categorical variables
+
+If you provide `lavaan` categorical data as an endogenous variable, it will automatically use a proper estimator (e.g. Diagonally Weighted Least Squares).
+
+To specify an ordinal variable as categorical, you will want to make it an *ordered factor*:
+
+```{r echo=T, eval=F}
+data <- data %>% mutate(cat_var=ordered(cat_var))
+```
+
+Unordered categorical variables (factors) will need to be split into dummy variables prior to estimation.
+
+## Covariance input matrix
+
+Here is example syntax from the `lavaan` tutorial page using the lower half of a covariance matrix combined with the `getCov()` function to create a full covariance matrix with variable names. Note the use of `sample.cov=` and `sample.nobs=` arguments to `sem()` instead of `data=`.
+
+```{r echo=T, eval=F}
+lower <- '
+ 11.834
+  6.947   9.364
+  6.819   5.091  12.532
+  4.783   5.028   7.495   9.986
+ -3.839  -3.889  -3.841  -3.625  9.610
+-21.899 -18.831 -21.748 -18.775 35.522 450.288 '
+
+wheaton.cov <- 
+    getCov(lower, names = c("anomia67", "powerless67", "anomia71", 
+                            "powerless71", "education", "sei"))
+
+fit <- sem(wheaton.model, sample.cov = wheaton.cov, sample.nobs = 932)
+
+```
+
+## Additional arguments
+
+Most of the time you will be fine with `lavaan`'s default settings.
+
+However, there are many, many arguments you can give to `sem()`, `cfa()`, or `lavaan()` to adjust how models are estimated.
+
+To see these arguments, view the help files using `?lavaan` and `?lavOptions`.
+
+## Help
+
+You can find a more detailed `lavaan` tutorial and a number of resources via the [official `lavaan` website](http://lavaan.ugent.be/).
+
+For troubleshooting, the [`lavaan` Google group](https://groups.google.com/forum/#!forum/lavaan) is very active and frequented by the package authors.
+
+`lavaan` is in constant development, so you may want to check the [GitHub repository](https://github.com/yrosseel/lavaan) for current issues or new features.
+
+If you need a new feature or bug fix from the development version, you can install it using `install_github()` in the `devtools` package.
